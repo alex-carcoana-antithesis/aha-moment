@@ -37,7 +37,6 @@ export const PICKER_BUGS: PickerBug[] = [
         "A rolling deploy and an autoscaler both try to change pod counts at once. Some requests land on pods that are terminating and never get a response.",
     },
     tag: "Concurrency",
-    tags: ["Fintech", "Cloud infrastructure"],
     invariant: "This value should never be null when read",
     codeFile: "revenue-cache.js",
     code: [
@@ -83,7 +82,6 @@ export const PICKER_BUGS: PickerBug[] = [
         "A cluster-wide config push holds a lock in the control plane. New node joins and service updates sit blocked until the push completes.",
     },
     tag: "Locks",
-    tags: ["Databases", "Fintech"],
     invariant: "Every write should complete within 5 seconds",
     codeFile: "orders.service.js",
     code: [
@@ -124,7 +122,6 @@ export const PICKER_BUGS: PickerBug[] = [
         "A “delete load balancer” request clears VIPs before the “drain connections” step runs. Active traffic is abruptly dropped instead of gracefully drained.",
     },
     tag: "Causality",
-    tags: ["Cloud infrastructure", "Databases"],
     invariant: "A deleted user should never have new data written to them",
     codeFile: "event.handler.js",
     code: [
