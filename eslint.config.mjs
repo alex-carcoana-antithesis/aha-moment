@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Root-level drop-in source files preserved for reference; the live
+    // implementations live in components/bug-picker.tsx + lib/picker-bugs.ts.
+    "bug-picker.jsx",
+    "bug-picker.css",
+    "bugs-data.js",
   ]),
 ]);
 
