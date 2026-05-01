@@ -5,13 +5,13 @@
    aren't disturbed. */
 
 .deep-scroll {
-  /* Synthetic Certainty palette */
-  --bg: #1b0d24;
-  --bg-deep: #16081f;
-  --surface-low: #24162d;
-  --surface: #281a31;
-  --surface-high: #33243c;
-  --surface-highest: #3e2f47;
+  /* Near-black with very subtle purple cast */
+  --bg: #000000;
+  --bg-deep: #050505;
+  --surface-low: #0e0a14;
+  --surface: #110d18;
+  --surface-high: #15101e;
+  --surface-highest: #1a1424;
   --on-surface: #f2dbfb;
   --on-surface-var: #c9c4d7;
   --outline: #928ea1;
@@ -50,13 +50,13 @@
 }
 .deep-scroll * { box-sizing: border-box; }
 
-/* Ambient glow orbs — local to the detail view */
+/* Ambient glow orbs — kept very subtle */
 .deep-scroll::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(600px circle at 12% 8%, rgba(145,126,255,0.18), transparent 60%),
-    radial-gradient(500px circle at 92% 88%, rgba(243,175,250,0.14), transparent 60%),
-    radial-gradient(800px circle at 50% 110%, rgba(93,64,221,0.18), transparent 70%);
+    radial-gradient(600px circle at 12% 8%, rgba(145,126,255,0.025), transparent 60%),
+    radial-gradient(500px circle at 92% 88%, rgba(243,175,250,0.02), transparent 60%),
+    radial-gradient(800px circle at 50% 110%, rgba(93,64,221,0.025), transparent 70%);
 }
 
 /* Back button — fixed top-left while scrolling */
@@ -85,9 +85,9 @@
   scroll-margin-top: 24px;
   z-index: 1;
 }
-.deep-scroll .vsec-code     { background: linear-gradient(180deg, transparent, rgba(145,126,255,0.04)); }
-.deep-scroll .vsec-tree     { background: linear-gradient(180deg, rgba(145,126,255,0.04), rgba(243,175,250,0.04)); }
-.deep-scroll .vsec-caught   { background: linear-gradient(180deg, rgba(243,175,250,0.04), rgba(145,126,255,0.04)); }
+.deep-scroll .vsec-code     { background: linear-gradient(180deg, transparent, rgba(145,126,255,0.015)); }
+.deep-scroll .vsec-tree     { background: linear-gradient(180deg, rgba(145,126,255,0.015), rgba(243,175,250,0.015)); }
+.deep-scroll .vsec-caught   { background: linear-gradient(180deg, rgba(243,175,250,0.015), rgba(145,126,255,0.015)); }
 
 .deep-scroll .vsec-inner {
   width: 100%; max-width: 1280px; margin: 0 auto;
@@ -141,6 +141,12 @@
   border-radius: 12px;
   padding: 18px 22px;
   display: flex; align-items: flex-start; gap: 14px;
+  opacity: 0;
+  animation: invariantFadeIn 600ms cubic-bezier(.2,.8,.2,1) 1800ms forwards;
+}
+@keyframes invariantFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
 }
 .deep-scroll .invariant .lab {
   font-family: var(--label); font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
@@ -151,6 +157,25 @@
 .deep-scroll .invariant .stmt {
   font-family: var(--display); font-size: 18px; font-weight: 500; letter-spacing: -0.01em;
   line-height: 1.4; margin: 0; color: var(--on-surface);
+  min-height: 1.4em;
+}
+.deep-scroll .type-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--secondary);
+  animation: typeCaretBlink 0.9s steps(1) infinite;
+}
+.deep-scroll .type-caret.is-done {
+  animation: typeCaretBlink 0.9s steps(1) infinite;
+  opacity: 0;
+  transition: opacity 600ms ease 600ms;
+}
+@keyframes typeCaretBlink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
 }
 
 /* Code block */
@@ -195,7 +220,9 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
+  overflow: hidden;
 }
+.deep-scroll .viz-stage svg { display: block; max-width: 100%; }
 .deep-scroll .viz-head {
   display: flex; justify-content: space-between; align-items: center;
   font-family: var(--label); font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
@@ -611,6 +638,29 @@
 
 /* SVG defaults inside the detail page */
 .deep-scroll svg text { font-family: var(--mono); font-size: 11px; fill: var(--on-surface-var); }
+
+/* Happy snouty — pops in (with a delay) when the Book-a-demo CTA enters the viewport */
+.deep-scroll .snouty {
+  position: fixed;
+  bottom: -90px;
+  right: -32px;
+  width: 420px;
+  height: auto;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(40px) rotate(14deg);
+  transition:
+    opacity 520ms cubic-bezier(.2,.9,.2,1) 700ms,
+    transform 520ms cubic-bezier(.2,.9,.2,1) 700ms;
+}
+.deep-scroll .snouty.is-visible {
+  opacity: 1;
+  transform: translateY(0) rotate(-6deg);
+}
+@media (max-width: 720px) {
+  .deep-scroll .snouty { width: 240px; right: -16px; bottom: -50px; }
+}
 
 /* Page transitions */
 .deep-scroll .fade-in { animation: deepFadeIn 320ms ease both; }

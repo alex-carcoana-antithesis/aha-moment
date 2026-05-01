@@ -26,15 +26,15 @@ export const PICKER_BUGS: PickerBug[] = [
     emoji: "🐛",
     descriptions: {
       "Web apps":
-        "Flash-sale and inventory sync both update the cart at once. The user checks out with “in stock” items that are already sold out.",
+        "Two cron jobs — one clears a cache and recalculates, the other reads it. They align in the same 10ms window. Reader gets null.",
       "Fintech":
-        "A trade engine and a risk recalculation run at the same time. One thread writes a new position while another reads the old one, briefly showing a profitable trade as a loss.",
+        "Two payment processors read the same account balance simultaneously. One transfer goes through that shouldn’t.",
       "Blockchain":
-        "Two validator threads update the same mempool entry under load. One sees a transaction as “pending,” the other as “included,” and the node gossips conflicting views to peers.",
+        "Two nodes validate the same transaction in the same block window. One gets committed. The other never knows.",
       "Databases":
-        "A bulk loader and an online migration both touch the same rows. Readers sometimes see new schema, sometimes old, depending on which write won.",
+        "Two queries write to the same row. The lock window is 8ms. One write silently disappears.",
       "Cloud infrastructure":
-        "A rolling deploy and an autoscaler both try to change pod counts at once. Some requests land on pods that are terminating and never get a response.",
+        "Two autoscaler jobs read the same instance count. Both spin up new nodes. You’re now running double the capacity.",
     },
     tag: "Concurrency",
     invariant: "This value should never be null when read",
@@ -49,7 +49,7 @@ export const PICKER_BUGS: PickerBug[] = [
       ["punct", "}"], ["br"],
       [],
       ["kw", "async function ", "fn", "sendRevenueAlert", "punct", "() {"], ["br"],
-      ["  ", "kw", "if ", "punct", "(", "var", "cachedRevenue", "punct", " === ", "kw", "null", "punct", ") {  ", "com", "// ", "bug", "💥 alert skipped"], ["br"],
+      ["  ", "kw", "if ", "punct", "(", "var", "cachedRevenue", "punct", " === ", "kw", "null", "punct", ") {"], ["br"],
       ["    ", "var", "logger", "punct", ".", "fn", "warn", "punct", "(", "str", "\"Revenue cache empty, skipping alert\"", "punct", ");"], ["br"],
       ["    ", "kw", "return", "punct", ";"], ["br"],
       ["  ", "punct", "}"], ["br"],
@@ -71,15 +71,15 @@ export const PICKER_BUGS: PickerBug[] = [
     emoji: "🪲",
     descriptions: {
       "Web apps":
-        "Background image-optimization grabs a global media lock. Product pages trying to attach images pile up and time out.",
+        "Nightly cleanup job has no index on the column it deletes by. Full table scan locks the entire table. Every write times out.",
       "Fintech":
-        "End-of-day ledger rollup holds a lock on the balances table. Real-time payments queue behind it until clients hit “insufficient funds” errors.",
+        "End-of-day reconciliation job locks the transactions table. Every incoming payment times out until it finishes.",
       "Blockchain":
-        "A pruning routine holds a lock on state snapshots while compaction runs. Block production slows to a crawl as new blocks wait on storage.",
+        "A validator holds a write lock waiting for consensus. Consensus is waiting for that same validator to release. Neither moves.",
       "Databases":
-        "A nightly VACUUM grabs a lock on a hot table just as an ETL job starts. Application writes stack up until timeouts ripple through the app tier.",
+        "A migration script locks a table while a background job tries to index it. Both wait forever. Prod goes down.",
       "Cloud infrastructure":
-        "A cluster-wide config push holds a lock in the control plane. New node joins and service updates sit blocked until the push completes.",
+        "A node drain waits for active connections to close. Active connections wait for the node to accept a healthcheck. Neither resolves.",
     },
     tag: "Locks",
     invariant: "Every write should complete within 5 seconds",
@@ -89,12 +89,12 @@ export const PICKER_BUGS: PickerBug[] = [
       ["kw", "async function ", "fn", "purgeDeletedAccounts", "punct", "() {"], ["br"],
       ["  ", "kw", "const ", "var", "accounts", "punct", " = ", "kw", "await ", "fn", "getDeletedAccounts", "punct", "();"], ["br"],
       ["  ", "kw", "for ", "punct", "(", "kw", "const ", "var", "account", "kw", " of ", "var", "accounts", "punct", ") {"], ["br"],
-      ["    ", "kw", "await ", "fn", "deleteOrdersByAccount", "punct", "(", "var", "account", "punct", ".", "prop", "id", "punct", ");     ", "com", "// ", "bug", "holds table lock for minutes"], ["br"],
+      ["    ", "kw", "await ", "fn", "deleteOrdersByAccount", "punct", "(", "var", "account", "punct", ".", "prop", "id", "punct", ");"], ["br"],
       ["  ", "punct", "}"], ["br"],
       ["punct", "}"], ["br"],
       [],
       ["kw", "async function ", "fn", "createOrder", "punct", "(", "var", "userId", "punct", ", ", "var", "items", "punct", ") {"], ["br"],
-      ["  ", "kw", "const ", "var", "order", "punct", " = ", "kw", "await ", "fn", "insertOrder", "punct", "(", "var", "userId", "punct", "); ", "com", "// ", "bug", "waits for lock — times out"], ["br"],
+      ["  ", "kw", "const ", "var", "order", "punct", " = ", "kw", "await ", "fn", "insertOrder", "punct", "(", "var", "userId", "punct", ");"], ["br"],
       ["  ", "kw", "await ", "fn", "insertOrderItems", "punct", "(", "var", "order", "punct", ".", "prop", "id", "punct", ", ", "var", "items", "punct", ");"], ["br"],
       ["punct", "}"], ["br"],
     ],
@@ -111,15 +111,15 @@ export const PICKER_BUGS: PickerBug[] = [
     emoji: "🦋",
     descriptions: {
       "Web apps":
-        "Password-reset confirmation hits before the “set new password” write lands. The link looks valid, but the user still can’t log in.",
+        "User triggers delete account and submit form milliseconds apart. Delete runs first. Submit writes data for a user that no longer exists.",
       "Fintech":
-        "“Close account” processes before a delayed “ACH deposit” event. The money lands in a closed account and support has to manually unwind it.",
+        "A refund event arrives before the original payment is committed. Refund succeeds. Payment never posts. Account balance is wrong.",
       "Blockchain":
-        "A slashing event for a validator arrives before the last reward distribution is applied. The chain records the penalty against an already-removed validator identity.",
+        "A block confirmation arrives before the transaction it confirms is indexed. Chain state is inconsistent for 3 minutes.",
       "Databases":
-        "A delete from an audit-log table lands before a late-arriving insert for the same key. The supposedly “complete history” is missing the most recent action.",
+        "A delete event and an insert event arrive in the wrong order. Row gets recreated after deletion. Constraint violated silently.",
       "Cloud infrastructure":
-        "A “delete load balancer” request clears VIPs before the “drain connections” step runs. Active traffic is abruptly dropped instead of gracefully drained.",
+        "A scale-down event fires before a health check completes. Instance is terminated mid-request. 500s with no trace.",
     },
     tag: "Causality",
     invariant: "A deleted user should never have new data written to them",
@@ -132,9 +132,9 @@ export const PICKER_BUGS: PickerBug[] = [
       ["  ", "punct", "}"], ["br"],
       [],
       ["  ", "kw", "if ", "punct", "(", "var", "event", "punct", ".", "prop", "type", "punct", " === ", "str", "'submit_form'", "punct", ") {"], ["br"],
-      ["    ", "kw", "const ", "var", "user", "punct", " = ", "kw", "await ", "fn", "getUser", "punct", "(", "var", "userId", "punct", ");     ", "com", "// ", "bug", "null — already deleted"], ["br"],
+      ["    ", "kw", "const ", "var", "user", "punct", " = ", "kw", "await ", "fn", "getUser", "punct", "(", "var", "userId", "punct", ");"], ["br"],
       ["    ", "kw", "await ", "fn", "saveFormSubmission", "punct", "(", "var", "user", "punct", ".", "prop", "id", "punct", ", ", "var", "event", "punct", ".", "prop", "data", "punct", ");"], ["br"],
-      ["    ", "kw", "await ", "fn", "sendConfirmationEmail", "punct", "(", "var", "user", "punct", ".", "prop", "email", "punct", ");     ", "com", "// ", "bug", "💥 crashes on null"], ["br"],
+      ["    ", "kw", "await ", "fn", "sendConfirmationEmail", "punct", "(", "var", "user", "punct", ".", "prop", "email", "punct", ");"], ["br"],
       ["  ", "punct", "}"], ["br"],
       ["punct", "}"], ["br"],
     ],
@@ -151,15 +151,15 @@ export const PICKER_BUGS: PickerBug[] = [
     emoji: "🦟",
     descriptions: {
       "Web apps":
-        "Worker dies halfway through generating a PDF invoice. The order shows “processing” forever and support keeps getting tickets.",
+        "Worker crashes mid-job. Restarts and sees the job already marked “processing.” Assumes someone else is handling it. Nobody is. Job never completes.",
       "Fintech":
-        "A batch job reconciling card transactions crashes mid-file. The restart skips that file, so dozens of purchases never settle until an auditor notices.",
+        "A settlement job crashes mid-run. Restarts and sees the batch marked “processing.” Skips it. Settlements never post.",
       "Blockchain":
-        "A node crashes during state-sync of a large range. On restart, the sync task is never resumed, so that node stays permanently a few hundred blocks behind.",
+        "A sync job crashes while indexing a block. Restarts, sees the block marked “synced.” Skips it. That block is missing from the index forever.",
       "Databases":
-        "Backup process crashes halfway through a full snapshot. The scheduler marks it “done,” but the next incremental backup silently chains to a non-existent base.",
+        "A vacuum job crashes mid-table. Restarts and sees the table marked “in progress.” Skips it. Dead rows accumulate for weeks.",
       "Cloud infrastructure":
-        "A log-processing worker dies in the middle of a shard. The orchestrator marks the pod healthy after restart but never reassigns that shard, so a slice of logs is never indexed.",
+        "A provisioning job crashes mid-deploy. Restarts, sees the environment marked “deploying.” Skips it. Instance is half-configured and serving traffic.",
     },
     tag: "Failure modes",
     invariant: "Every job that starts should eventually complete",
@@ -167,13 +167,12 @@ export const PICKER_BUGS: PickerBug[] = [
     code: [
       ["kw", "async function ", "fn", "processJob", "punct", "(", "var", "job", "punct", ") {"], ["br"],
       ["  ", "kw", "await ", "fn", "updateJobStatus", "punct", "(", "var", "job", "punct", ".", "prop", "id", "punct", ", ", "str", "'processing'", "punct", ");"], ["br"],
-      ["  ", "kw", "await ", "fn", "doWork", "punct", "(", "var", "job", "punct", ");                   ", "com", "// ", "bug", "pod crashes here"], ["br"],
-      ["  ", "kw", "await ", "fn", "updateJobStatus", "punct", "(", "var", "job", "punct", ".", "prop", "id", "punct", ", ", "str", "'complete'", "punct", ");  ", "com", "// ", "bug", "never runs"], ["br"],
+      ["  ", "kw", "await ", "fn", "doWork", "punct", "(", "var", "job", "punct", ");"], ["br"],
+      ["  ", "kw", "await ", "fn", "updateJobStatus", "punct", "(", "var", "job", "punct", ".", "prop", "id", "punct", ", ", "str", "'complete'", "punct", ");"], ["br"],
       ["punct", "}"], ["br"],
       [],
       ["kw", "async function ", "fn", "startWorker", "punct", "() {"], ["br"],
       ["  ", "kw", "const ", "var", "jobs", "punct", " = ", "kw", "await ", "fn", "getJobsByStatus", "punct", "(", "str", "'processing'", "punct", ");"], ["br"],
-      ["  ", "com", "// sees stuck job from last crash — ", "bug", "skips it"], ["br"],
       ["  ", "kw", "await ", "fn", "processNewJobs", "punct", "();"], ["br"],
       ["punct", "}"], ["br"],
     ],
@@ -190,15 +189,15 @@ export const PICKER_BUGS: PickerBug[] = [
     emoji: "🐞",
     descriptions: {
       "Web apps":
-        "User profile is updated in the DB, but the CDN cache purge fails silently. For hours, some users see their ex-partner’s name still on shared accounts.",
+        "Profile update saves to DB. Network hiccup means downstream services never hear about it. User sees old data for hours.",
       "Fintech":
-        "A portfolio rebalance writes new weights to the DB, but the quotes cache never invalidates. Advisors stare at dashboards showing yesterday’s allocations with today’s market risk.",
+        "Balance updates in the core ledger. Risk engine is still reading the old value. Approves a transaction it shouldn’t.",
       "Blockchain":
-        "A block is committed to disk, but the index for transaction lookups fails to update. Explorers show “transaction not found” for operations that are actually in the chain.",
+        "Node updates its local state. Peer nodes don’t get the propagation. Two nodes disagree on current chain state for 60 seconds.",
       "Databases":
-        "A replicated DB applies a write, but the binlog shipper drops a segment. Secondaries serve slightly older data that never quite matches the primary.",
+        "A read replica lags 2 seconds behind the primary. Query hits the replica. Returns data that was just deleted. No error thrown.",
       "Cloud infrastructure":
-        "Object storage writes complete, but the metadata index update fails. Monitoring shows “green” buckets while some objects are effectively invisible to reads.",
+        "Config update deploys to 9 of 10 instances. One instance misses it. Serves stale config to 10% of traffic for hours.",
     },
     tag: "Consistency",
     invariant: "Downstream views should always reflect the latest write",
@@ -206,7 +205,7 @@ export const PICKER_BUGS: PickerBug[] = [
     code: [
       ["kw", "async function ", "fn", "updateUserProfile", "punct", "(", "var", "userId", "punct", ", ", "var", "data", "punct", ") {"], ["br"],
       ["  ", "kw", "await ", "fn", "saveProfile", "punct", "(", "var", "userId", "punct", ", ", "var", "data", "punct", ");               ", "com", "// succeeds — written to DB"], ["br"],
-      ["  ", "kw", "await ", "fn", "invalidateOldData", "punct", "(", "var", "userId", "punct", ");             ", "com", "// ", "bug", "network hiccup — never runs"], ["br"],
+      ["  ", "kw", "await ", "fn", "invalidateOldData", "punct", "(", "var", "userId", "punct", ");"], ["br"],
       ["                                                 ", "com", "// downstream services miss the update"], ["br"],
       ["                                                 ", "com", "// user sees old profile for hours"], ["br"],
       ["punct", "}"], ["br"],

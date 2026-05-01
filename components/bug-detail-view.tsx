@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Calendar } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -817,7 +818,51 @@ function DeepDive({ bug }: { bug: PickerBug }) {
   const sec1Ref = useRef<HTMLElement | null>(null);
   const sec2Ref = useRef<HTMLElement | null>(null);
   const sec3Ref = useRef<HTMLElement | null>(null);
+  const ctaRef = useRef<HTMLDivElement | null>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [typedInvariant, setTypedInvariant] = useState("");
+  const [typingDone, setTypingDone] = useState(false);
+  const [snoutyVisible, setSnoutyVisible] = useState(false);
+
+  // Show happy snouty in the bottom-right when the Book-a-demo CTA is in view
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          setSnoutyVisible(e.isIntersecting);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [bug.id]);
+
+  // Typewriter for the invariant: starts once the card has finished fading in
+  // (matches the .invariant CSS: 1800ms delay + 600ms duration).
+  useEffect(() => {
+    setTypedInvariant("");
+    setTypingDone(false);
+    const fullText = `“${bug.invariant}”`;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const start = window.setTimeout(() => {
+      let i = 0;
+      interval = setInterval(() => {
+        i += 1;
+        setTypedInvariant(fullText.slice(0, i));
+        if (i >= fullText.length) {
+          if (interval) clearInterval(interval);
+          setTypingDone(true);
+        }
+      }, 28);
+    }, 2400);
+    return () => {
+      window.clearTimeout(start);
+      if (interval) clearInterval(interval);
+    };
+  }, [bug.id, bug.invariant]);
 
   const scrollToSection = (i: number) => {
     const refs = [sec1Ref, sec2Ref, sec3Ref];
@@ -868,7 +913,13 @@ function DeepDive({ bug }: { bug: PickerBug }) {
           <div className="invariant">
             <div>
               <div className="lab">Tell antithesis what should never happen</div>
-              <p className="stmt">&ldquo;{bug.invariant}&rdquo;</p>
+              <p className="stmt" aria-label={`“${bug.invariant}”`}>
+                {typedInvariant}
+                <span
+                  className={`type-caret${typingDone ? " is-done" : ""}`}
+                  aria-hidden
+                />
+              </p>
             </div>
           </div>
         </div>
@@ -876,8 +927,7 @@ function DeepDive({ bug }: { bug: PickerBug }) {
           <Button
             type="button"
             size="lg"
-            className="cursor-pointer"
-            style={{ backgroundColor: "#917eff", color: "#0a0826" }}
+            className="cursor-pointer bg-[#a89af0] hover:bg-[#beb4ff] text-[#0a0826] transition-colors h-12 px-7 text-[18px] gap-2"
             onClick={() => scrollToSection(1)}
           >
             <ArrowRight className="h-4 w-4" />
@@ -895,8 +945,7 @@ function DeepDive({ bug }: { bug: PickerBug }) {
           <Button
             type="button"
             size="lg"
-            className="cursor-pointer"
-            style={{ backgroundColor: "#917eff", color: "#0a0826" }}
+            className="cursor-pointer bg-[#a89af0] hover:bg-[#beb4ff] text-[#0a0826] transition-colors h-12 px-7 text-[18px] gap-2"
             onClick={() => scrollToSection(2)}
           >
             <ArrowRight className="h-4 w-4" />
@@ -926,12 +975,11 @@ function DeepDive({ bug }: { bug: PickerBug }) {
             <li>Jane Street</li>
           </ul>
         </div>
-        <div className="vsec-cta-wrap">
+        <div className="vsec-cta-wrap" ref={ctaRef}>
           <Button
             type="button"
             size="lg"
-            className="cursor-pointer"
-            style={{ backgroundColor: "#917eff", color: "#0a0826" }}
+            className="cursor-pointer bg-[#a89af0] hover:bg-[#beb4ff] text-[#0a0826] transition-colors h-12 px-7 text-[18px] gap-2"
             render={<a href="#" />}
             nativeButton={false}
           >
@@ -940,6 +988,16 @@ function DeepDive({ bug }: { bug: PickerBug }) {
           </Button>
         </div>
       </section>
+
+      {/* Happy snouty pops in when the Book-a-demo CTA is in view */}
+      <Image
+        src="/happy-snouty.png"
+        alt=""
+        aria-hidden
+        width={800}
+        height={800}
+        className={`snouty${snoutyVisible ? " is-visible" : ""}`}
+      />
 
       {/* Internal nav */}
       <nav className="vnav" aria-label="Detail sections">

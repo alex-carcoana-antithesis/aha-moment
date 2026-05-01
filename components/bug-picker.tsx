@@ -2,7 +2,6 @@
 
 import { useState, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Bug } from "lucide-react";
 
@@ -16,6 +15,14 @@ const BUG_TAGS = [
   "Cloud infrastructure",
 ] as const;
 type BugTag = (typeof BUG_TAGS)[number];
+
+const INDUSTRY_SLUGS: Record<BugTag, string> = {
+  "Web apps": "web",
+  "Fintech": "fin",
+  "Blockchain": "chain",
+  "Databases": "db",
+  "Cloud infrastructure": "cloud",
+};
 
 function Picker() {
   const router = useRouter();
@@ -47,6 +54,7 @@ function Picker() {
             type="button"
             role="tab"
             aria-selected={t === activeTag}
+            data-industry={INDUSTRY_SLUGS[t]}
             className={`tag-tab${t === activeTag ? " is-active" : ""}`}
             onClick={() => setActiveTag(t)}
           >
@@ -54,7 +62,7 @@ function Picker() {
           </button>
         ))}
       </div>
-      <div className="cards">
+      <div className="cards" data-industry={INDUSTRY_SLUGS[activeTag]}>
         {PICKER_BUGS.map((b) => (
           <Link
             key={b.id}
@@ -63,13 +71,14 @@ function Picker() {
             onMouseMove={handleMove}
             onMouseEnter={() => router.prefetch(`/sandbox/${b.id}`)}
           >
-            <div className="card-meta">
-              <span className="card-chip">{b.name}</span>
-              <span className="card-arrow" aria-hidden>
-                →
-              </span>
+            <Bug className="card-bug-mark" aria-hidden />
+            <span className="card-arrow" aria-hidden>
+              →
+            </span>
+            <div className="card-body">
+              <span className="card-name">{b.name}</span>
+              <p className="sub-line">{b.descriptions[activeTag]}</p>
             </div>
-            <p className="sub-line">{b.descriptions[activeTag]}</p>
             <Bug className="card-bug" aria-hidden />
           </Link>
         ))}
@@ -81,28 +90,7 @@ function Picker() {
 export function BugPickerView() {
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          bottom: "0",
-          right: "-100px",
-          zIndex: 0,
-          pointerEvents: "none",
-          userSelect: "none",
-          opacity: 0.35,
-        }}
-        aria-hidden="true"
-      >
-        <Image
-          src="/sad.png"
-          alt=""
-          width={500}
-          height={500}
-          className="h-auto"
-          style={{ width: "900px" }}
-          priority={false}
-        />
-      </div>
+      <div className="sandbox-bg" aria-hidden="true" />
       <div className="picker-shell">
         <div className="picker-root">
           <Picker />

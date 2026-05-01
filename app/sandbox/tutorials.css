@@ -47,9 +47,21 @@
 .picker-shell::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(600px circle at 12% 8%, rgba(145,126,255,0.04), transparent 60%),
-    radial-gradient(500px circle at 92% 88%, rgba(243,175,250,0.03), transparent 60%),
-    radial-gradient(800px circle at 50% 110%, rgba(93,64,221,0.04), transparent 70%);
+    radial-gradient(600px circle at 12% 8%, rgba(145,126,255,0.02), transparent 60%),
+    radial-gradient(500px circle at 92% 88%, rgba(243,175,250,0.015), transparent 60%),
+    radial-gradient(800px circle at 50% 110%, rgba(93,64,221,0.02), transparent 70%);
+}
+
+/* Background image for the sandbox page */
+.sandbox-bg {
+  position: fixed; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('/bg-buggy.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.8;
 }
 
 .picker-shell .picker-root { position: relative; z-index: 1;  }
@@ -145,69 +157,106 @@
   font-size: 15px; color: #ffffff; max-width: 60ch; margin: 0 0 18px; line-height: 1.55;
 }
 
-/* Tag tabs — purple pill style */
+/* Tag tabs — colored per industry */
 .picker-shell .tag-tabs {
   display: flex; gap: 8px; flex-wrap: wrap;
   margin: 0 0 32px;
 }
 .picker-shell .tag-tab {
-  font-family: var(--body); font-size: 13px; font-weight: 500;
+  --ind: 145, 126, 255;
+  font-family: var(--body); font-size: 16px; font-weight: 500;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.10);
   color: rgba(255,255,255,0.65);
-  padding: 7px 14px; cursor: pointer;
+  padding: 9px 18px; cursor: pointer;
   border-radius: 4px;
   transition: color 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
+.picker-shell .tag-tab[data-industry="web"]   { --ind: 145, 126, 255; }
+.picker-shell .tag-tab[data-industry="fin"]   { --ind:  91, 155, 255; }
+.picker-shell .tag-tab[data-industry="chain"] { --ind:  91, 227, 200; }
+.picker-shell .tag-tab[data-industry="db"]    { --ind: 255, 211,  74; }
+.picker-shell .tag-tab[data-industry="cloud"] { --ind: 255, 138,  58; }
 .picker-shell .tag-tab:hover {
   color: #ffffff;
-  background: rgba(145,126,255,0.10);
-  border-color: rgba(145,126,255,0.30);
+  background: rgba(var(--ind), 0.10);
+  border-color: rgba(var(--ind), 0.30);
 }
 .picker-shell .tag-tab.is-active {
   color: #ffffff;
-  background: rgba(145,126,255,0.22);
-  border-color: rgba(145,126,255,0.55);
-  box-shadow: 0 0 0 1px rgba(145,126,255,0.25), 0 4px 18px -6px rgba(145,126,255,0.45);
+  background: rgba(var(--ind), 0.22);
+  border-color: rgba(var(--ind), 0.55);
+  box-shadow: 0 0 0 1px rgba(var(--ind), 0.25), 0 4px 18px -6px rgba(var(--ind), 0.45);
 }
 
-.picker-shell .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+/* Per-industry accent colors as RGB triples so we can compose alpha. */
+.picker-shell .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; --ind: 145, 126, 255; }
+.picker-shell .cards[data-industry="web"]   { --ind: 145, 126, 255; }   /* purple */
+.picker-shell .cards[data-industry="fin"]   { --ind:  91, 155, 255; }   /* blue */
+.picker-shell .cards[data-industry="chain"] { --ind:  91, 227, 200; }   /* teal */
+.picker-shell .cards[data-industry="db"]    { --ind: 255, 211,  74; }   /* yellow */
+.picker-shell .cards[data-industry="cloud"] { --ind: 255, 138,  58; }   /* orange */
+
 .picker-shell .card {
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(8,3,28,0.15);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border: 2px solid rgba(var(--ind), 0.5);
+  background: #000000;
   border-radius: 4px;
   padding: 22px 24px 22px;
   cursor: pointer;
   position: relative; overflow: hidden;
-  transition: border-color 220ms ease, transform 220ms ease, background 220ms ease, box-shadow 220ms ease;
+  transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
   display: flex; flex-direction: column; min-height: 230px;
 }
 .picker-shell .card::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(145,126,255,0.55), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--ind), 0.65), transparent);
   opacity: 0; transition: opacity 220ms ease;
   display: block;
 }
 .picker-shell .card:hover {
-  border-color: rgba(145,126,255,0.40);
-  background: rgba(15,6,40,0.25);
+  border-color: rgba(var(--ind), 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 14px 40px -18px rgba(145,126,255,0.45);
+  box-shadow: 0 14px 40px -18px rgba(var(--ind), 0.55);
 }
 .picker-shell .card:hover::before { opacity: 1; }
 
-.picker-shell .card-meta {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  margin-bottom: 14px;
-  position: relative; z-index: 1;
+/* Card body: bug name shown by default, description appears on hover */
+.picker-shell .card-body {
+  flex: 1;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  margin: 8px 0 4px;
+  z-index: 1;
 }
+.picker-shell .card-name,
+.picker-shell .card .sub-line {
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center;
+  margin: 0;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.picker-shell .card-name {
+  justify-content: center; text-align: center;
+  font-family: var(--display);
+  font-size: 30px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.1;
+  color: #ffffff;
+  opacity: 1;
+}
+.picker-shell .card .sub-line {
+  justify-content: flex-start; text-align: left;
+  font-family: var(--body); font-size: 18px; line-height: 1.45;
+  color: #ffffff; opacity: 0;
+  transform: translateY(6px);
+}
+.picker-shell .card:hover .card-name { opacity: 0; transform: translateY(-6px); }
+.picker-shell .card:hover .sub-line { opacity: 0.95; transform: none; }
+
 .picker-shell .card-bug {
   position: absolute;
   bottom: -16px; right: -16px;
   width: 140px; height: 140px;
-  color: var(--primary-strong);
+  color: rgb(var(--ind));
   opacity: 0;
   transform: rotate(-22deg);
   pointer-events: none;
@@ -215,58 +264,36 @@
   transition: opacity 220ms ease;
 }
 .picker-shell .card:hover .card-bug { opacity: 0.15; }
-.picker-shell .card-chip {
-  font-family: var(--body); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.10em; text-transform: uppercase;
-  color: rgba(255,255,255,0.85);
-  background: rgba(145,126,255,0.14);
-  border: 1px solid rgba(145,126,255,0.32);
-  padding: 4px 10px;
-  border-radius: 4px;
+
+/* Bug mark in top-left, colored to match the card border. Fades on hover. */
+.picker-shell .card-bug-mark {
+  position: absolute;
+  top: 18px; left: 22px;
+  width: 32px; height: 32px;
+  color: rgb(var(--ind));
+  opacity: 1;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 220ms ease;
 }
+.picker-shell .card:hover .card-bug-mark { opacity: 0; }
+
 .picker-shell .card-arrow {
+  position: absolute;
+  top: 18px; right: 22px;
   font-size: 18px; line-height: 1;
-  color: var(--primary);
-  opacity: 0.55;
+  color: rgb(var(--ind));
+  opacity: 0;
   display: inline-block;
   transition: transform 200ms ease, opacity 200ms ease;
+  z-index: 2;
+  pointer-events: none;
 }
 .picker-shell .card:hover .card-arrow {
   opacity: 1;
   transform: translateX(3px);
 }
 
-.picker-shell .card .num {
-  font-family: var(--label); font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
-  color: #ffffff; text-transform: uppercase; margin-bottom: 18px;
-  display: flex; align-items: center; gap: 10px;
-}
-.picker-shell .card .num .tag {
-  border: 1px solid rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 4px;
-  background: rgba(255,255,255,0.04); color: #ffffff;
-}
-.picker-shell .card .bug-row {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 4px;
-}
-.picker-shell .card h2 {
-  font-family: var(--display); font-size: 13px; line-height: 1.2; letter-spacing: 0.06em;
-  font-weight: 500; text-transform: uppercase;
-  margin: 0; color: rgba(255,255,255,0.6);
-}
-.picker-shell .card .sub-line {
-  color: #ffffff; font-family: var(--body); font-size: 18px; line-height: 1.5; margin: 0;
-  font-weight: 400;
-  flex: 1; opacity: 0.95;
-  position: relative; z-index: 1;
-}
-.picker-shell .card .arrow {
-  margin-top: 18px; display: flex; align-items: center; justify-content: space-between;
-  font-family: var(--label); font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--primary); opacity: 0.65; transition: opacity 200ms ease, transform 200ms ease;
-}
-.picker-shell .card:hover .arrow { opacity: 1; }
-.picker-shell .card:hover .arrow .pulse { transform: translateX(3px); }
-.picker-shell .card .arrow .pulse { font-size: 18px; transition: transform 200ms ease; display: inline-block; }
 
 /* ── Deep Dive ───────────── */
 .picker-shell .deep {
@@ -638,8 +665,50 @@
 .picker-shell .deep { padding-bottom: 140px; }
 
 /* Page transitions */
-.picker-shell .fade-in { animation: pickerFadeIn 320ms ease both; }
-@keyframes pickerFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* Wrapper itself stays mounted; children animate in staggered. */
+.picker-shell .fade-in { opacity: 1; }
+
+/* 1. Title slams in first */
+.picker-shell .fade-in > header {
+  opacity: 0;
+  transform-origin: 50% 50%;
+  animation: titleSlam 380ms cubic-bezier(.18,.9,.12,1) 1400ms forwards;
+}
+@keyframes titleSlam {
+  0%   { opacity: 0; transform: scale(2.4); filter: blur(8px); }
+  60%  { opacity: 1; }
+  85%  { transform: scale(0.97); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* Brief impact-shake on the whole picker just after the title lands */
+.picker-shell .fade-in {
+  animation: titleImpact 320ms cubic-bezier(.5,.1,.3,1) 1780ms;
+}
+@keyframes titleImpact {
+  0%, 100% { transform: translate(0, 0); }
+  20%      { transform: translate(-3px, 0); }
+  40%      { transform: translate(4px, 1px); }
+  60%      { transform: translate(-2px, -1px); }
+  80%      { transform: translate(2px, 1px); }
+}
+
+/* 2. Tabs fade in after the title settles */
+.picker-shell .fade-in > .tag-tabs {
+  opacity: 0;
+  animation: stagFade 500ms cubic-bezier(.2,.8,.2,1) 2100ms forwards;
+}
+
+/* 3. Cards fade in last */
+.picker-shell .fade-in > .cards {
+  opacity: 0;
+  animation: stagFade 600ms cubic-bezier(.2,.8,.2,1) 2500ms forwards;
+}
+
+@keyframes stagFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
 
 /* SVG defaults */
 .picker-shell svg text { font-family: var(--mono); font-size: 11px; fill: rgba(255,255,255,0.7); }

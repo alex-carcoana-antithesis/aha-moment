@@ -14,12 +14,20 @@ export default function Home() {
         Bug-free systems, unlimited velocity: Unleash your agents
       </h3>
       <div className="flex gap-2">
-      <Button variant="default" size="lg" className="mt-10 cursor-pointer" style={{ backgroundColor: '#917eff', color: '#0a0826' }}>
+      <Button
+        variant="default"
+        size="lg"
+        className="mt-10 cursor-pointer bg-[#917eff] hover:bg-[#a89af0] text-[#0a0826] text-[15px] transition-colors"
+      >
         <Calendar className="h-4 w-4" />
         Book a demo
       </Button>
       <Link href="/sandbox" >
-      <Button variant="secondary" size="lg" className="mt-10 cursor-pointer transition-colors hover:color-white" style={{ backgroundColor: 'transparent', color: '#917eff' }}>
+      <Button
+        variant="secondary"
+        size="lg"
+        className="mt-10 cursor-pointer bg-transparent text-[#917eff] hover:bg-transparent hover:text-white text-[15px] transition-colors"
+      >
        What&rsquo;s your favorite bug?
       </Button>
       </Link>
