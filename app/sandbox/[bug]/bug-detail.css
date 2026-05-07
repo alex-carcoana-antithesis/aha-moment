@@ -99,6 +99,7 @@
   display: flex; justify-content: center;
   margin-top: 20px;
 }
+.deep-scroll .vsec-caught .vsec-cta-wrap { padding-bottom: 64px; }
 
 .deep-scroll .vsec-code { justify-content: flex-start; padding-top: 32px; }
 .deep-scroll .vsec-code .vsec-inner {
@@ -331,28 +332,69 @@
 .deep-scroll .caught-anim { width: 100%; }
 .deep-scroll .caught-anim .viz-panel { margin: 0; max-width: none; width: 100%; }
 
-/* Caught: social proof */
-.deep-scroll .caught-proof {
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
+/* Caught: case studies */
+.deep-scroll .case-studies {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 64px;
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+}
+.deep-scroll .case-studies-lab {
+  font-family: var(--label); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
   text-align: center;
 }
-.deep-scroll .caught-proof-lab {
-  font-family: var(--label); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
-}
-.deep-scroll .caught-proof-list {
+.deep-scroll .case-studies-list {
   list-style: none; margin: 0; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(20,12,28,0.85), rgba(14,10,20,0.9));
+  border: 1px solid rgba(202,192,243,0.12);
+  border-radius: 14px;
+  overflow: hidden;
 }
-.deep-scroll .caught-proof-list li {
-  font-family: var(--display); font-size: 18px; font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #ffffff;
-  padding: 8px 14px;
-  border: 1px solid rgba(202,192,243,0.20);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.03);
+.deep-scroll .case-study {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 18px;
+  padding: 32px 36px 28px;
+  background: rgba(20,12,28,0.85);
+}
+.deep-scroll .case-study-logo {
+  font-family: var(--display); font-size: 14px; font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.92);
+  text-transform: uppercase;
+}
+.deep-scroll .case-study-stat {
+  font-family: var(--display);
+  font-size: clamp(56px, 6vw, 80px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--primary-strong);
+  margin-top: 4px;
+}
+.deep-scroll .case-study-desc {
+  font-family: var(--body);
+  font-size: 15px; line-height: 1.45;
+  color: rgba(255,255,255,0.78);
+  margin: 0;
+  max-width: 30ch;
+}
+.deep-scroll .case-study-link {
+  font-family: var(--body); font-size: 14px; font-weight: 500;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
+}
+.deep-scroll .case-study-link:hover { color: var(--on-surface); }
+@media (max-width: 900px) {
+  .deep-scroll .case-studies-list { grid-template-columns: 1fr; }
 }
 .deep-scroll .verdict-tag {
   font-family: var(--label); font-size: 12px; font-weight: 500;

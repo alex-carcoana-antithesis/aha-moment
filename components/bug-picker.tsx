@@ -39,7 +39,7 @@ function Picker() {
       <header className="flex flex-row items-center gap-8">
         <div className="flex flex-col gap-4 mb-6">
           <h2 className="text-7xl font-bold leading-[1.05] tracking-tight">
-            What&rsquo;s your favorite bug?
+            What is your least favorite bug?
           </h2>
           <h3 className="text-lg text-muted-foreground">
             We&rsquo;ll show you how to find it and fix it in Antithesis.

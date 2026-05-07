@@ -28,7 +28,7 @@ export default function Home() {
         size="lg"
         className="mt-10 cursor-pointer bg-transparent text-[#917eff] hover:bg-transparent hover:text-white text-[15px] transition-colors"
       >
-       What&rsquo;s your favorite bug?
+       What is your least favorite bug?
       </Button>
       </Link>
       </div>

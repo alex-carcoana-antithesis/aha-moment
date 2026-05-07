@@ -268,30 +268,39 @@ function RaceViz() {
           })}
 
           {step >= 3 && (
-            <>
-              <rect
-                x={x(0.5)}
-                y="100"
-                width={x(0.78) - x(0.5)}
-                height="60"
-                fill="rgba(255,138,130,0.14)"
-                stroke="rgba(255,138,130,0.5)"
-                strokeDasharray="4 4"
-                rx="6"
-              />
-              <text x={(x(0.5) + x(0.78)) / 2} y="120" textAnchor="middle" fill={C.err}>
-                null window · 10ms 😱
-              </text>
-              <text
-                x={(x(0.5) + x(0.78)) / 2}
-                y="138"
-                textAnchor="middle"
-                fill={C.err}
-                fontSize="10"
+            <foreignObject
+              x={(x(0.5) + x(0.78)) / 2 - 140}
+              y="96"
+              width="280"
+              height="64"
+              style={{ overflow: "visible" }}
+            >
+              <div
+                xmlns="http://www.w3.org/1999/xhtml"
+                style={{
+                  width: "max-content",
+                  margin: "0 auto",
+                  padding: "8px 14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 2,
+                  background: "rgba(255,138,130,0.14)",
+                  border: "1px dashed rgba(255,138,130,0.5)",
+                  borderRadius: 6,
+                  color: C.err,
+                  fontFamily:
+                    "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace",
+                  fontSize: 11,
+                  lineHeight: 1.25,
+                  textAlign: "center",
+                  whiteSpace: "nowrap",
+                }}
               >
-                reader sees null here
-              </text>
-            </>
+                <span>null window · 10ms 😱</span>
+                <span style={{ fontSize: 10 }}>reader sees null here</span>
+              </div>
+            </foreignObject>
           )}
 
           <line x1="60" y1="180" x2={W - 30} y2="180" stroke={C.line} strokeWidth="2" />
@@ -967,12 +976,33 @@ function DeepDive({ bug }: { bug: PickerBug }) {
             <Viz />
           </div>
         </div>
-        <div className="caught-proof">
-          <div className="caught-proof-lab">We did this for…</div>
-          <ul className="caught-proof-list">
-            <li>MongoDB</li>
-            <li>Netflix</li>
-            <li>Jane Street</li>
+        <div className="case-studies">
+          <div className="case-studies-lab">Read the case studies</div>
+          <ul className="case-studies-list">
+            <li className="case-study">
+              <div className="case-study-logo">CONFLUENT</div>
+              <div className="case-study-stat">40%</div>
+              <p className="case-study-desc">
+                Reduction in overall engineering hours spent on testing and triage
+              </p>
+              <a className="case-study-link" href="#">Read more</a>
+            </li>
+            <li className="case-study">
+              <div className="case-study-logo">TURSO</div>
+              <div className="case-study-stat">10x</div>
+              <p className="case-study-desc">
+                Faster time-to-release with fewer critical failures
+              </p>
+              <a className="case-study-link" href="#">Read more</a>
+            </li>
+            <li className="case-study">
+              <div className="case-study-logo">MongoDB</div>
+              <div className="case-study-stat">75+</div>
+              <p className="case-study-desc">
+                Severe bugs found that all other testing missed
+              </p>
+              <a className="case-study-link" href="#">Read more</a>
+            </li>
           </ul>
         </div>
         <div className="vsec-cta-wrap" ref={ctaRef}>
