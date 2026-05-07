@@ -276,7 +276,6 @@ function RaceViz() {
               style={{ overflow: "visible" }}
             >
               <div
-                xmlns="http://www.w3.org/1999/xhtml"
                 style={{
                   width: "max-content",
                   margin: "0 auto",
